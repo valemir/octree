@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # 1. Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: octree_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - octree_net
+
+  # 2. LaTeX Compile Engine
+  latex-compiler:
+    image: islandora/latex-service:latest
+    container_name: octree_compiler
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - octree_net
+
+  # 3. AI Agent Backend
+  octree-agent:
+    build:
+      context: ./agent_server
+      dockerfile: Dockerfile
+    container_name: octree_agent
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      PORT: "8787"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      COMPILE_SERVICE_URL: "http://latex-compiler:8080/compile"
+    depends_on:
+      - latex-compiler
+    networks:
+      - octree_net
+
+  # 4. Web Frontend
+  octree-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: octree_web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      NEXT_PUBLIC_AGENT_SERVER_URL: "http://${LXC_HOST_IP}:8787"
+      COMPILE_SERVICE_URL: "http://latex-compiler:8080/compile"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+    depends_on:
+      - postgres
+      - octree-agent
+    networks:
+      - octree_net
+
+volumes:
+  postgres_data:
+
+networks:
+  octree_net:
+    driver: bridge
