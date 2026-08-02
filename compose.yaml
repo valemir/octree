@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. Database
   postgres:
@@ -17,9 +15,9 @@ services:
     networks:
       - octree_net
 
-  # 2. LaTeX Compile Engine
+  # 2. LaTeX Compile Engine (Public TeX Live HTTP Service)
   latex-compiler:
-    image: islandora/latex-service:latest
+    image: ytotech/latex-on-http:latest
     container_name: octree_compiler
     restart: unless-stopped
     ports:
