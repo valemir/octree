@@ -17,7 +17,7 @@ services:
 
   # 2. LaTeX Compile Engine (Public TeX Live HTTP Service)
   latex-compiler:
-    image: ytotech/latex-on-http:latest
+    image: yoant/latexonhttp-python:latest
     container_name: octree_compiler
     restart: unless-stopped
     ports:
