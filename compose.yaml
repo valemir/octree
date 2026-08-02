@@ -15,13 +15,13 @@ services:
     networks:
       - octree_net
 
-  # 2. LaTeX Compile Engine (Public TeX Live HTTP Service)
+  # 2. LaTeX Compile Engine (Public TeX Live REST API)
   latex-compiler:
-    image: yoant/latexonhttp-python:latest
+    image: matthewjarvis/latex-compileservice:latest
     container_name: octree_compiler
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8080:5000"
     networks:
       - octree_net
 
