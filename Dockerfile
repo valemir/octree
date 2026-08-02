@@ -4,11 +4,19 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
-# Copy application code and build Next.js
+# Copy application code
 COPY . .
+
+# Build-time Environment & Memory Allocation
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_PUBLIC_SUPABASE_URL="https://placeholder.supabase.co"
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY="placeholder"
+
+# Build Next.js application
 RUN npm run build
 
 EXPOSE 3000
