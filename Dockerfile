@@ -1,5 +1,6 @@
 # Standard Node.js Dockerfile for Octree Next.js Frontend
-FROM node:20-alpine WORKDIR /app
+FROM node:20-alpine
+WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
