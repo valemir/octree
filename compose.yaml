@@ -47,12 +47,12 @@ services:
       GOTRUE_API_PORT: "9999"
       GOTRUE_DB_DRIVER: "postgres"
       GOTRUE_DB_DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-OctreeSecure2026}@postgres:5432/${POSTGRES_DB:-octree_db}?sslmode=disable"
-      GOTRUE_SITE_URL: "http://${LXC_HOST_IP:-192.168.50.5}:3000"
-      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP:-192.168.50.5}:3000/*"
+      GOTRUE_SITE_URL: "http://${LXC_HOST_IP:-localhost}:3000"
+      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP:-localhost}:3000/*"
       GOTRUE_DISABLE_SIGNUP: "false"
       GOTRUE_JWT_SECRET: "${SUPABASE_JWT_SECRET:-super_secret_jwt_key_for_octree_12345}"
       GOTRUE_JWT_EXP: "3600"
-      API_EXTERNAL_URL: "http://${LXC_HOST_IP:-192.168.50.5}:9999"
+      API_EXTERNAL_URL: "http://${LXC_HOST_IP:-localhost}:9999"
     depends_on:
       postgres-init:
         condition: service_completed_successfully
