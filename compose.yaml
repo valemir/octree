@@ -5,18 +5,37 @@ services:
     container_name: octree_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-octree_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-OctreeSecure2026}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
     ports:
       - "5432:5432"
     networks:
       - octree_net
 
-# Local Supabase Auth Microservice
+  # 2. Automated Schema Initializer
+  postgres-init:
+    image: postgres:16-alpine
+    container_name: octree_db_init
+    restart: "no"
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-OctreeSecure2026}
+    command: >
+      sh -c "
+        until pg_isready -h postgres -U ${POSTGRES_USER:-postgres}; do
+          echo 'Waiting for postgres...'
+          sleep 1
+        done;
+        psql -h postgres -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-octree_db} -c 'CREATE SCHEMA IF NOT EXISTS auth; CREATE EXTENSION IF NOT EXISTS pgcrypto;'
+      "
+    depends_on:
+      - postgres
+    networks:
+      - octree_net
+
+  # 3. Local Supabase Auth Microservice
   supabase-auth:
     image: supabase/gotrue:v2.161.0
     container_name: octree_auth
@@ -35,11 +54,12 @@ services:
       GOTRUE_JWT_EXP: "3600"
       API_EXTERNAL_URL: "http://${LXC_HOST_IP:-192.168.50.5}:9999"
     depends_on:
-      - postgres
+      postgres-init:
+        condition: service_completed_successfully
     networks:
       - octree_net
 
-  # 3. LaTeX Compile Engine
+  # 4. LaTeX Compile Engine
   latex-compiler:
     image: matthewjarvis/latex-compileservice:latest
     container_name: octree_compiler
@@ -49,7 +69,7 @@ services:
     networks:
       - octree_net
 
-  # 4. AI Agent Backend
+  # 5. AI Agent Backend
   octree-agent:
     build:
       context: ./agent_server
@@ -70,7 +90,7 @@ services:
     networks:
       - octree_net
 
-  # 5. Web Frontend
+  # 6. Web Frontend
   octree-web:
     build:
       context: .
