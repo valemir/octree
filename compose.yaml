@@ -23,9 +23,11 @@ services:
     ports:
       - "9999:9999"
     environment:
+      GOTRUE_API_HOST: "0.0.0.0"
       GOTRUE_API_PORT: 9999
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      GOTRUE_DB_DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      GOTRUE_DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
       GOTRUE_SITE_URL: "http://${LXC_HOST_IP}:3000"
       GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP}:3000/*"
       GOTRUE_DISABLE_SIGNUP: "false"
