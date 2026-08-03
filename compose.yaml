@@ -15,7 +15,7 @@ services:
     networks:
       - octree_net
 
-  # 2. Local Supabase Auth Microservice
+# Local Supabase Auth Microservice
   supabase-auth:
     image: supabase/gotrue:v2.161.0
     container_name: octree_auth
@@ -24,16 +24,18 @@ services:
       - "9999:9999"
     environment:
       GOTRUE_API_HOST: "0.0.0.0"
-      GOTRUE_API_PORT: 9999
-      GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
-      GOTRUE_DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
-      GOTRUE_SITE_URL: "http://${LXC_HOST_IP}:3000"
-      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP}:3000/*"
+      GOTRUE_API_PORT: "9999"
+      GOTRUE_DB_DRIVER: "postgres"
+      DB_DRIVER: "postgres"
+      GOTRUE_DB_DATABASE_URL: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-octree_password}@postgres:5432/${POSTGRES_DB:-octree_db}?sslmode=disable"
+      GOTRUE_DATABASE_URL: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-octree_password}@postgres:5432/${POSTGRES_DB:-octree_db}?sslmode=disable"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-octree_password}@postgres:5432/${POSTGRES_DB:-octree_db}?sslmode=disable"
+      GOTRUE_SITE_URL: "http://${LXC_HOST_IP:-192.168.50.5}:3000"
+      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP:-192.168.50.5}:3000/*"
       GOTRUE_DISABLE_SIGNUP: "false"
-      GOTRUE_JWT_SECRET: "${SUPABASE_JWT_SECRET}"
-      GOTRUE_JWT_EXP: 3600
-      API_EXTERNAL_URL: "http://${LXC_HOST_IP}:9999"
+      GOTRUE_JWT_SECRET: "${SUPABASE_JWT_SECRET:-super_secret_jwt_key_for_octree_12345}"
+      GOTRUE_JWT_EXP: "3600"
+      API_EXTERNAL_URL: "http://${LXC_HOST_IP:-192.168.50.5}:9999"
     depends_on:
       - postgres
     networks:
