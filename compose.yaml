@@ -15,7 +15,29 @@ services:
     networks:
       - octree_net
 
-  # 2. LaTeX Compile Engine
+  # 2. Local Supabase Auth Microservice
+  supabase-auth:
+    image: supabase/gotrue:v2.161.0
+    container_name: octree_auth
+    restart: unless-stopped
+    ports:
+      - "9999:9999"
+    environment:
+      GOTRUE_API_PORT: 9999
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      GOTRUE_SITE_URL: "http://${LXC_HOST_IP}:3000"
+      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP}:3000/*"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_SECRET: "${SUPABASE_JWT_SECRET}"
+      GOTRUE_JWT_EXP: 3600
+      API_EXTERNAL_URL: "http://${LXC_HOST_IP}:9999"
+    depends_on:
+      - postgres
+    networks:
+      - octree_net
+
+  # 3. LaTeX Compile Engine
   latex-compiler:
     image: matthewjarvis/latex-compileservice:latest
     container_name: octree_compiler
@@ -25,7 +47,7 @@ services:
     networks:
       - octree_net
 
-  # 3. AI Agent Backend
+  # 4. AI Agent Backend
   octree-agent:
     build:
       context: ./agent_server
@@ -46,7 +68,7 @@ services:
     networks:
       - octree_net
 
-  # 4. Web Frontend
+  # 5. Web Frontend
   octree-web:
     build:
       context: .
@@ -63,8 +85,11 @@ services:
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
       SUPABASE_JWT_SECRET: "${SUPABASE_JWT_SECRET}"
+      NEXT_PUBLIC_SUPABASE_URL: "http://${LXC_HOST_IP}:9999"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
     depends_on:
       - postgres
+      - supabase-auth
       - octree-agent
     networks:
       - octree_net
