@@ -5,9 +5,9 @@ services:
     container_name: octree_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-octree_db}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-OctreeSecure2026}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -21,14 +21,14 @@ services:
     container_name: octree_db_init
     restart: "no"
     environment:
-      PGPASSWORD: ${POSTGRES_PASSWORD:-OctreeSecure2026}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
     command: >
       sh -c "
-        until pg_isready -h postgres -U ${POSTGRES_USER:-postgres}; do
+        until pg_isready -h postgres -U ${POSTGRES_USER}; do
           echo 'Waiting for postgres...'
           sleep 1
         done;
-        psql -h postgres -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-octree_db} -c 'CREATE SCHEMA IF NOT EXISTS auth; CREATE EXTENSION IF NOT EXISTS pgcrypto;'
+        psql -h postgres -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c 'CREATE SCHEMA IF NOT EXISTS auth; CREATE EXTENSION IF NOT EXISTS pgcrypto;'
       "
     depends_on:
       - postgres
@@ -43,20 +43,22 @@ services:
     ports:
       - "9999:9999"
     environment:
+      # Network & API Settings
       GOTRUE_API_HOST: "0.0.0.0"
       GOTRUE_API_PORT: "9999"
       GOTRUE_DB_DRIVER: "postgres"
-      GOTRUE_DB_DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-OctreeSecure2026}@postgres:5432/${POSTGRES_DB:-octree_db}?sslmode=disable"
-      GOTRUE_SITE_URL: "http://${LXC_HOST_IP:-192.168.50.5}:3000"
-      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP:-192.168.50.5}:3000/*"
+      GOTRUE_DB_DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      GOTRUE_SITE_URL: "http://${LXC_HOST_IP}:3000"
+      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP}:3000/*,http://localhost:3000/*"
+      GOTRUE_CORS_ALLOWED_ORIGINS: "*"
       GOTRUE_DISABLE_SIGNUP: "false"
-      GOTRUE_JWT_SECRET: "${SUPABASE_JWT_SECRET:-super_secret_jwt_key_for_octree_12345}"
+      GOTRUE_JWT_SECRET: "${SUPABASE_JWT_SECRET}"
       GOTRUE_JWT_EXP: "3600"
-      API_EXTERNAL_URL: "http://${LXC_HOST_IP:-192.168.50.5}:9999"
-      
-      # Self-Hosted SMTP Configuration
+      API_EXTERNAL_URL: "http://${LXC_HOST_IP}:9999"
+
+      # Self-Hosted SMTP Mail Configuration
       GOTRUE_SMTP_HOST: "${SMTP_HOST}"
-      GOTRUE_SMTP_PORT: "${SMTP_PORT:-587}"
+      GOTRUE_SMTP_PORT: "${SMTP_PORT}"
       GOTRUE_SMTP_USER: "${SMTP_USER}"
       GOTRUE_SMTP_PASS: "${SMTP_PASS}"
       GOTRUE_SMTP_ADMIN_EMAIL: "${SMTP_ADMIN_EMAIL}"
@@ -104,11 +106,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SUPABASE_URL: "http://${LXC_HOST_IP}:9999"
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: "${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
-        NEXT_PUBLIC_AGENT_SERVER_URL: "http://${LXC_HOST_IP}:8787"
-        RESEND_API_KEY: "${RESEND_API_KEY:-re_12345_build_placeholder}"
-        STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY:-sk_test_build_placeholder}"
+        LXC_HOST_IP: "${LXC_HOST_IP}"
     container_name: octree_web
     restart: unless-stopped
     ports:
