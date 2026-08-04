@@ -12,23 +12,24 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build-time Environment Variables
+# Declare Build Arguments passed from docker-compose.yml
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_AGENT_SERVER_URL
+ARG RESEND_API_KEY
+ARG STRIPE_SECRET_KEY
+
+# Convert ARGs to ENV for Next.js build
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+ENV NEXT_PUBLIC_AGENT_SERVER_URL=${NEXT_PUBLIC_AGENT_SERVER_URL}
+ENV RESEND_API_KEY=${RESEND_API_KEY}
+ENV STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-ENV NEXT_PUBLIC_SUPABASE_URL="https://placeholder.supabase.co"
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY="placeholder_anon_key"
-ENV NEXT_PUBLIC_AGENT_SERVER_URL="http://localhost:8787"
-ENV SUPABASE_JWT_SECRET="super_secret_jwt_key_for_octree_12345"
-ENV DATABASE_URL="postgres://postgres:octree_password@postgres:5432/octree_db"
-ENV RESEND_API_KEY="re_123456789_placeholder_for_build"
-ENV STRIPE_SECRET_KEY="sk_test_123456789_placeholder"
-ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_123456789_placeholder"
-ENV ANTHROPIC_API_KEY="sk-ant-api03-placeholder"
-ENV OPENAI_API_KEY="sk-placeholder"
-
-# Compile Next.js production bundle
 RUN npm run build
 
 # 3. Runner Stage

@@ -95,6 +95,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: "http://${LXC_HOST_IP}:9999"
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
+        NEXT_PUBLIC_AGENT_SERVER_URL: "http://${LXC_HOST_IP}:8787"
+        RESEND_API_KEY: "${RESEND_API_KEY:-re_12345_build_placeholder}"
+        STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY:-sk_test_build_placeholder}"
     container_name: octree_web
     restart: unless-stopped
     ports:
