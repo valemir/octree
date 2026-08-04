@@ -43,20 +43,19 @@ services:
     ports:
       - "9999:9999"
     environment:
-      # Network & API Settings
       GOTRUE_API_HOST: "0.0.0.0"
       GOTRUE_API_PORT: "9999"
       GOTRUE_DB_DRIVER: "postgres"
       GOTRUE_DB_DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
-      GOTRUE_SITE_URL: "http://${LXC_HOST_IP}:3000"
-      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP}:3000/*,http://localhost:3000/*"
+      GOTRUE_SITE_URL: "https://octree.${DOMAIN_NAME}"
+      GOTRUE_URI_ALLOW_LIST: "https://octree.${DOMAIN_NAME}/*"
       GOTRUE_CORS_ALLOWED_ORIGINS: "*"
       GOTRUE_DISABLE_SIGNUP: "false"
       GOTRUE_JWT_SECRET: "${SUPABASE_JWT_SECRET}"
       GOTRUE_JWT_EXP: "3600"
-      API_EXTERNAL_URL: "http://${LXC_HOST_IP}:9999"
+      API_EXTERNAL_URL: "https://octree-auth.${DOMAIN_NAME}"
 
-      # Self-Hosted SMTP Mail Configuration
+      # Self-Hosted SMTP Configuration
       GOTRUE_SMTP_HOST: "${SMTP_HOST}"
       GOTRUE_SMTP_PORT: "${SMTP_PORT}"
       GOTRUE_SMTP_USER: "${SMTP_USER}"
@@ -106,20 +105,20 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        LXC_HOST_IP: "${LXC_HOST_IP}"
+        DOMAIN_NAME: "${DOMAIN_NAME}"
     container_name: octree_web
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
-      NEXT_PUBLIC_AGENT_SERVER_URL: "http://${LXC_HOST_IP}:8787"
+      NEXT_PUBLIC_AGENT_SERVER_URL: "https://octree-agent.${DOMAIN_NAME}"
       COMPILE_SERVICE_URL: "http://latex-compiler:8080/compile"
       OLLAMA_BASE_URL: "${OLLAMA_BASE_URL}"
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
       SUPABASE_JWT_SECRET: "${SUPABASE_JWT_SECRET}"
-      NEXT_PUBLIC_SUPABASE_URL: "http://${LXC_HOST_IP}:9999"
+      NEXT_PUBLIC_SUPABASE_URL: "https://octree-auth.${DOMAIN_NAME}"
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
     depends_on:
       - postgres
