@@ -36,7 +36,7 @@ services:
       - octree_net
 
   # 3. Local Supabase Auth Microservice
-  supabase-auth:
+supabase-auth:
     image: supabase/gotrue:v2.161.0
     container_name: octree_auth
     restart: unless-stopped
@@ -47,12 +47,20 @@ services:
       GOTRUE_API_PORT: "9999"
       GOTRUE_DB_DRIVER: "postgres"
       GOTRUE_DB_DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-OctreeSecure2026}@postgres:5432/${POSTGRES_DB:-octree_db}?sslmode=disable"
-      GOTRUE_SITE_URL: "http://${LXC_HOST_IP:-localhost}:3000"
-      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP:-localhost}:3000/*"
+      GOTRUE_SITE_URL: "http://${LXC_HOST_IP:-192.168.50.5}:3000"
+      GOTRUE_URI_ALLOW_LIST: "http://${LXC_HOST_IP:-192.168.50.5}:3000/*"
       GOTRUE_DISABLE_SIGNUP: "false"
       GOTRUE_JWT_SECRET: "${SUPABASE_JWT_SECRET:-super_secret_jwt_key_for_octree_12345}"
       GOTRUE_JWT_EXP: "3600"
-      API_EXTERNAL_URL: "http://${LXC_HOST_IP:-localhost}:9999"
+      API_EXTERNAL_URL: "http://${LXC_HOST_IP:-192.168.50.5}:9999"
+      
+      # Self-Hosted SMTP Configuration
+      GOTRUE_SMTP_HOST: "${SMTP_HOST}"
+      GOTRUE_SMTP_PORT: "${SMTP_PORT:-587}"
+      GOTRUE_SMTP_USER: "${SMTP_USER}"
+      GOTRUE_SMTP_PASS: "${SMTP_PASS}"
+      GOTRUE_SMTP_ADMIN_EMAIL: "${SMTP_ADMIN_EMAIL}"
+      GOTRUE_MAILER_AUTCONFIRM: "false"
     depends_on:
       postgres-init:
         condition: service_completed_successfully
